@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ChatTarget {
+  id             Int      @id @default(autoincrement())
+  chatId         String   @unique @map("chat_id")
+  label          String
+  enabled        Boolean  @default(true)
+  allowCommands  Boolean  @default(true) @map("allow_commands")
+  allowReminders Boolean  @default(true) @map("allow_reminders")
+  deviceId       String?  @map("device_id")
+  reminderOffset Int      @default(15) @map("reminder_offset")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  reminders ReminderQueue[]
+
+  @@map("chat_targets")
+}
+
+model Course {
+  id              Int      @id @default(autoincrement())
+  name            String
+  locationDefault String?  @map("location_default")
+  lecturerName    String   @map("lecturer_name")
+  lecturerWa      String?  @map("lecturer_wa")
+  lecturerCode    String?  @map("lecturer_code")
+  defaultNote     String?  @map("default_note")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  scheduleEntries ScheduleEntry[]
+  notes           Note[]
+
+  @@map("courses")
+}
+
+model ScheduleEntry {
+  id               Int      @id @default(autoincrement())
+  courseId          Int      @map("course_id")
+  dayOfWeek        Int      @map("day_of_week")
+  startTime        String   @map("start_time")
+  endTime          String   @map("end_time")
+  locationOverride String?  @map("location_override")
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("schedule_entries")
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  courseId  Int      @unique @map("course_id")
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model ReminderQueue {
+  id              Int       @id @default(autoincrement())
+  chatTargetId    Int       @map("chat_target_id")
+  scheduleEntryId Int?      @map("schedule_entry_id")
+  eventType       String    @map("event_type")
+  scheduledAt     DateTime  @map("scheduled_at")
+  sentAt          DateTime? @map("sent_at")
+  status          String    @default("PENDING")
+  retryCount      Int       @default(0) @map("retry_count")
+  message         String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  chatTarget ChatTarget @relation(fields: [chatTargetId], references: [id], onDelete: Cascade)
+
+  @@unique([chatTargetId, eventType, scheduledAt])
+  @@map("reminder_queue")
+}
+
+model Holiday {
+  id        Int      @id @default(autoincrement())
+  date      String   @unique
+  reason    String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("holidays")
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}

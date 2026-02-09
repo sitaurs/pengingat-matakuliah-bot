@@ -1,0 +1,36 @@
+import type { CommandContext } from './router.js';
+
+export async function handleHelp(_ctx: CommandContext): Promise<string> {
+  return [
+    '╔═══════════════════════════╗',
+    '║  🤖 *SCHEDULE BOT COMMANDS*',
+    '╚═══════════════════════════╝',
+    '',
+    '📋 *Jadwal*',
+    '▸ `!jadwal` — Jadwal minggu ini',
+    '▸ `!hari` — Jadwal hari ini',
+    '▸ `!besok` — Jadwal besok',
+    '▸ `!next` — Kelas berikutnya + countdown',
+    '▸ `!now` — Status sekarang',
+    '▸ `!where` — Lokasi kelas',
+    '▸ `!detail <no>` — Detail kelas ke-N',
+    '',
+    '👤 *Dosen & Notes*',
+    '▸ `!dosen <query>` — Cari info dosen',
+    '▸ `!note set <matkul> | <teks>`',
+    '▸ `!note get <matkul>`',
+    '▸ `!note clear <matkul>`',
+    '',
+    '⏰ *Reminder*',
+    '▸ `!reminder on/off` — Toggle reminder',
+    '▸ `!reminder test` — Test reminder',
+    '▸ `!reminder offset <menit>`',
+    '',
+    '📅 *Libur & Lainnya*',
+    '▸ `!libur add YYYY-MM-DD | alasan`',
+    '▸ `!libur list` — Daftar libur',
+    '▸ `!ping` — Cek bot hidup',
+    '▸ `!status` — Status bot',
+    '▸ `!help` — Daftar command ini',
+  ].join('\n');
+}

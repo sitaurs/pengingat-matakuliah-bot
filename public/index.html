@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Schedule Bot Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <canvas id="particles-canvas"></canvas>
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-orb bg-orb-4"></div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card glass">
+      <div class="login-logo">
+        <i class="fas fa-robot"></i>
+      </div>
+      <h1>Schedule Bot</h1>
+      <p class="login-subtitle">Admin Panel</p>
+      <form id="login-form">
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="login-user" placeholder="Username" autocomplete="username" required>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <p id="login-error" class="error-text" style="display:none"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app" style="display:none">
+    <!-- Sidebar -->
+    <nav class="sidebar glass">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fas fa-robot"></i></div>
+        <span class="sidebar-title">Schedule Bot</span>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+        </li>
+        <li class="nav-item" data-page="jadwal">
+          <i class="fas fa-calendar-alt"></i><span>Jadwal</span>
+        </li>
+        <li class="nav-item" data-page="courses">
+          <i class="fas fa-book"></i><span>Mata Kuliah</span>
+        </li>
+        <li class="nav-item" data-page="groups">
+          <i class="fas fa-users"></i><span>Grup Chat</span>
+        </li>
+        <li class="nav-item" data-page="notes">
+          <i class="fas fa-sticky-note"></i><span>Notes</span>
+        </li>
+        <li class="nav-item" data-page="holidays">
+          <i class="fas fa-umbrella-beach"></i><span>Libur</span>
+        </li>
+        <li class="nav-item" data-page="reminders">
+          <i class="fas fa-bell"></i><span>Reminders</span>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-sm" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar glass">
+        <button class="btn btn-ghost sidebar-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h2 id="page-title">Dashboard</h2>
+        <div class="topbar-right">
+          <span class="clock" id="clock"></span>
+          <span class="badge badge-success" id="bot-status">
+            <i class="fas fa-circle"></i> Online
+          </span>
+        </div>
+      </header>
+
+      <!-- Pages -->
+      <div class="page-container">
+
+        <!-- ═══ Dashboard ═══ -->
+        <section id="page-dashboard" class="page active">
+          <div class="stats-grid">
+            <div class="stat-card glass" style="--accent:#00f5ff">
+              <div class="stat-icon"><i class="fas fa-book"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="stat-courses">—</span>
+                <span class="stat-label">Mata Kuliah</span>
+              </div>
+            </div>
+            <div class="stat-card glass" style="--accent:#b44eff">
+              <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="stat-entries">—</span>
+                <span class="stat-label">Jadwal</span>
+              </div>
+            </div>
+            <div class="stat-card glass" style="--accent:#ff6eb4">
+              <div class="stat-icon"><i class="fas fa-users"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="stat-groups">—</span>
+                <span class="stat-label">Grup Aktif</span>
+              </div>
+            </div>
+            <div class="stat-card glass" style="--accent:#00ff88">
+              <div class="stat-icon"><i class="fas fa-bell"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="stat-pending">—</span>
+                <span class="stat-label">Reminder Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card glass">
+              <div class="card-header">
+                <h3><i class="fas fa-chart-bar"></i> Reminder Status</h3>
+              </div>
+              <div class="card-body">
+                <div class="reminder-bars">
+                  <div class="bar-item">
+                    <span class="bar-label">Pending</span>
+                    <div class="bar-track"><div class="bar-fill pending" id="bar-pending"></div></div>
+                    <span class="bar-value" id="bar-pending-val">0</span>
+                  </div>
+                  <div class="bar-item">
+                    <span class="bar-label">Terkirim</span>
+                    <div class="bar-track"><div class="bar-fill sent" id="bar-sent"></div></div>
+                    <span class="bar-value" id="bar-sent-val">0</span>
+                  </div>
+                  <div class="bar-item">
+                    <span class="bar-label">Gagal</span>
+                    <div class="bar-track"><div class="bar-fill failed" id="bar-failed"></div></div>
+                    <span class="bar-value" id="bar-failed-val">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card glass">
+              <div class="card-header">
+                <h3><i class="fas fa-terminal"></i> Quick Actions</h3>
+              </div>
+              <div class="card-body actions-grid">
+                <button class="btn btn-outline" onclick="rebuildQueue()">
+                  <i class="fas fa-sync"></i> Rebuild Queue
+                </button>
+                <button class="btn btn-outline" onclick="clearOldReminders()">
+                  <i class="fas fa-trash"></i> Clear Old
+                </button>
+                <button class="btn btn-outline" onclick="testGoWA()">
+                  <i class="fas fa-plug"></i> Test GoWA
+                </button>
+                <button class="btn btn-outline" onclick="refreshDashboard()">
+                  <i class="fas fa-refresh"></i> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Commands Reference Card -->
+          <div class="card glass" style="margin-top:20px">
+            <div class="card-header">
+              <h3><i class="fas fa-robot"></i> Bot Commands Reference</h3>
+            </div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+                <div>
+                  <h4 style="color:var(--accent);margin-bottom:8px"><i class="fas fa-calendar"></i> Jadwal</h4>
+                  <div style="font-size:13px;line-height:2">
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!jadwal</code> Jadwal minggu ini<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!hari</code> Jadwal hari ini<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!besok</code> Jadwal besok<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!next</code> Kelas berikutnya + countdown<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!now</code> Status sekarang<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!where</code> Lokasi kelas<br>
+                    <code style="background:rgba(0,245,255,0.1);padding:2px 8px;border-radius:4px;color:#00f5ff">!detail &lt;no&gt;</code> Detail kelas ke-N
+                  </div>
+                </div>
+                <div>
+                  <h4 style="color:var(--purple);margin-bottom:8px"><i class="fas fa-user"></i> Dosen & Notes</h4>
+                  <div style="font-size:13px;line-height:2">
+                    <code style="background:rgba(180,78,255,0.1);padding:2px 8px;border-radius:4px;color:#b44eff">!dosen &lt;query&gt;</code> Cari info dosen<br>
+                    <code style="background:rgba(180,78,255,0.1);padding:2px 8px;border-radius:4px;color:#b44eff">!note set &lt;matkul&gt; | &lt;teks&gt;</code><br>
+                    <code style="background:rgba(180,78,255,0.1);padding:2px 8px;border-radius:4px;color:#b44eff">!note get &lt;matkul&gt;</code><br>
+                    <code style="background:rgba(180,78,255,0.1);padding:2px 8px;border-radius:4px;color:#b44eff">!note clear &lt;matkul&gt;</code>
+                  </div>
+                </div>
+                <div>
+                  <h4 style="color:var(--pink);margin-bottom:8px"><i class="fas fa-bell"></i> Reminder & Lainnya</h4>
+                  <div style="font-size:13px;line-height:2">
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!reminder on/off</code> Toggle reminder<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!reminder test</code> Test reminder<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!reminder offset &lt;n&gt;</code> Ubah offset<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!libur add &lt;date&gt; | &lt;alasan&gt;</code><br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!libur list</code> Daftar libur<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!ping</code> Cek bot hidup<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!status</code> Status bot<br>
+                    <code style="background:rgba(255,110,180,0.1);padding:2px 8px;border-radius:4px;color:#ff6eb4">!help</code> Daftar command
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Jadwal ═══ -->
+        <section id="page-jadwal" class="page">
+          <div class="page-header">
+            <h3>Jadwal Kuliah</h3>
+            <button class="btn btn-primary" onclick="showModal('entry')">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="card glass">
+            <div class="tabs">
+              <button class="tab active" data-day="1">Senin</button>
+              <button class="tab" data-day="2">Selasa</button>
+              <button class="tab" data-day="3">Rabu</button>
+              <button class="tab" data-day="4">Kamis</button>
+              <button class="tab" data-day="5">Jumat</button>
+            </div>
+            <div class="card-body">
+              <div id="schedule-list" class="schedule-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Courses ═══ -->
+        <section id="page-courses" class="page">
+          <div class="page-header">
+            <h3>Mata Kuliah & Dosen</h3>
+            <button class="btn btn-primary" onclick="showModal('course')">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="card glass">
+            <div class="card-body">
+              <div id="courses-list" class="data-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Groups ═══ -->
+        <section id="page-groups" class="page">
+          <div class="page-header">
+            <h3>Grup Chat Terdaftar</h3>
+            <button class="btn btn-primary" onclick="showModal('group')">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="card glass">
+            <div class="card-body">
+              <div id="groups-list" class="data-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Notes ═══ -->
+        <section id="page-notes" class="page">
+          <div class="page-header">
+            <h3>Catatan per Matkul</h3>
+            <button class="btn btn-primary" onclick="showModal('note')">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="card glass">
+            <div class="card-body">
+              <div id="notes-list" class="data-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Holidays ═══ -->
+        <section id="page-holidays" class="page">
+          <div class="page-header">
+            <h3>Hari Libur</h3>
+            <button class="btn btn-primary" onclick="showModal('holiday')">
+              <i class="fas fa-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="card glass">
+            <div class="card-body">
+              <div id="holidays-list" class="data-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══ Reminders ═══ -->
+        <section id="page-reminders" class="page">
+          <div class="page-header">
+            <h3>Reminder Queue</h3>
+            <div class="filter-group">
+              <select id="reminder-filter" class="select-glass" onchange="loadReminders()">
+                <option value="">Semua</option>
+                <option value="PENDING">Pending</option>
+                <option value="SENT">Terkirim</option>
+                <option value="FAILED">Gagal</option>
+              </select>
+            </div>
+          </div>
+          <div class="card glass">
+            <div class="card-body">
+              <div id="reminders-list" class="data-grid"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none">
+    <div class="modal glass" id="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Form</h3>
+        <button class="btn btn-ghost" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

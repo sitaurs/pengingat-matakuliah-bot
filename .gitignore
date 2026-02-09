@@ -1,0 +1,9 @@
+node_modules/
+dist/
+prisma/data/
+*.db
+*.db-journal
+.env
+.env.local
+.env.production
+logs/
