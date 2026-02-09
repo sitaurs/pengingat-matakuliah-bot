@@ -151,6 +151,9 @@ async function loadDashboard() {
       badge.innerHTML = '<i class="fas fa-circle"></i> Offline';
     }
   }
+
+  // Load upcoming reminders
+  loadUpcomingReminders();
 }
 
 function setText(id, val) {
@@ -166,6 +169,66 @@ function setBar(barId, valId, count, total) {
 }
 
 function refreshDashboard() { loadDashboard(); toast('Refreshed!', 'info'); }
+
+async function loadUpcomingReminders() {
+  try {
+    const data = await api('/reminders/upcoming');
+    const container = document.getElementById('upcoming-reminders');
+    if (!container) return;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim)"><i class="fas fa-check-circle"></i> Tidak ada reminder mendatang</div>';
+      return;
+    }
+    container.innerHTML = data.map((r, i) => {
+      const dt = new Date(r.scheduledAt);
+      const dateStr = dt.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+      const timeStr = dt.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false });
+      const typeIcon = r.eventType === 'PRE_CLASS' ? '⏰' : r.eventType === 'CLASS_START' ? '🔔' : '📢';
+      const typeLabel = r.eventType === 'PRE_CLASS' ? 'Pre-Class' : r.eventType === 'CLASS_START' ? 'Class Start' : r.eventType;
+      const typeBadgeColor = r.eventType === 'PRE_CLASS' ? 'rgba(255,165,0,0.2);color:#ffa500' : 'rgba(0,245,255,0.2);color:#00f5ff';
+      return `<div class="upcoming-reminder-item" onclick='previewReminderMessage(${JSON.stringify(r.messagePreview).replace(/'/g, "&#39;")})'>
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+          <span style="font-size:20px;flex-shrink:0">${typeIcon}</span>
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.courseName)}</div>
+            <div style="font-size:12px;color:var(--text-dim);display:flex;gap:8px;flex-wrap:wrap">
+              <span>📅 ${dateStr}</span>
+              <span>🕐 ${timeStr}</span>
+              <span>📍 ${esc(r.location)}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:${typeBadgeColor}">${typeLabel}</span>
+          <span style="font-size:11px;color:var(--text-dim)">${esc(r.chatTargetLabel)}</span>
+          <i class="fas fa-eye" style="color:var(--accent);font-size:12px"></i>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    const container = document.getElementById('upcoming-reminders');
+    if (container) container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--pink)"><i class="fas fa-exclamation-triangle"></i> Gagal memuat reminder</div>';
+  }
+}
+
+function previewReminderMessage(message) {
+  const formatted = message
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.1);padding:1px 4px;border-radius:3px">$1</code>')
+    .replace(/\n/g, '<br>');
+  const body = `<div style="background:#0b141a;border-radius:12px;padding:16px 14px;font-family:'Segoe UI',sans-serif;font-size:13.5px;line-height:1.6;color:#e9edef;max-height:50vh;overflow-y:auto;white-space:pre-line;border:1px solid rgba(0,245,255,0.15)">
+    <div style="margin-bottom:8px"><span style="background:#00a884;color:#fff;font-size:10px;padding:2px 8px;border-radius:4px">📱 WhatsApp Preview</span></div>
+    ${formatted}
+  </div>`;
+  document.getElementById('modal-title').textContent = '📱 Preview Pesan Reminder';
+  document.getElementById('modal-body').innerHTML = body + `
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal()">Tutup</button>
+    </div>`;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
 
 async function testGoWA() {
   try {

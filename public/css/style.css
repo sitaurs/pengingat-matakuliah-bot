@@ -529,6 +529,26 @@ body {
 
 .row-actions { display: flex; gap: 4px; }
 
+/* ═══ Upcoming Reminders ═══ */
+.upcoming-reminder-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+.upcoming-reminder-item:hover {
+  background: rgba(0,245,255,0.05);
+  border-color: rgba(0,245,255,0.15);
+  transform: translateX(4px);
+}
+.upcoming-reminder-item:last-child { border-bottom: none; }
+
 /* ═══ Modal ═══ */
 .modal-overlay {
   position: fixed;

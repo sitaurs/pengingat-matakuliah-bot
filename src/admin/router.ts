@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import { prisma } from '../index.js';
 import { config } from '../config.js';
 import { buildReminderQueue } from '../scheduler/queue-builder.js';
+import { formatReminder } from '../utils/format.js';
 import logger from '../utils/logger.js';
 
 export const adminRouter = Router();
@@ -283,6 +284,67 @@ adminRouter.delete('/api/holidays/:id', async (req, res) => {
 });
 
 // ═══ Reminders (read + management) ═══
+adminRouter.get('/api/reminders/upcoming', async (_req, res) => {
+  try {
+    const reminders = await prisma.reminderQueue.findMany({
+      where: { status: 'PENDING', scheduledAt: { gt: new Date() } },
+      include: { chatTarget: true },
+      orderBy: { scheduledAt: 'asc' },
+      take: 10,
+    });
+
+    // Generate message preview for each reminder
+    const results = await Promise.all(reminders.map(async (r) => {
+      let messagePreview = r.message || '';
+      let courseName = '—';
+      let startTime = '';
+      let endTime = '';
+      let location = '';
+      let lecturerName = '';
+
+      if (r.scheduleEntryId) {
+        const entry = await prisma.scheduleEntry.findUnique({
+          where: { id: r.scheduleEntryId },
+          include: { course: true },
+        });
+        if (entry) {
+          courseName = entry.course.name;
+          startTime = entry.startTime;
+          endTime = entry.endTime;
+          location = entry.locationOverride || entry.course.locationDefault || '—';
+          lecturerName = entry.course.lecturerName;
+          if (!messagePreview) {
+            const note = await prisma.note.findUnique({ where: { courseId: entry.courseId } });
+            messagePreview = formatReminder(
+              r.eventType,
+              entry as any,
+              note?.text,
+              r.chatTarget.reminderOffset
+            );
+          }
+        }
+      }
+
+      return {
+        id: r.id,
+        eventType: r.eventType,
+        scheduledAt: r.scheduledAt,
+        chatTargetLabel: r.chatTarget.label,
+        courseName,
+        startTime,
+        endTime,
+        location,
+        lecturerName,
+        messagePreview,
+      };
+    }));
+
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 adminRouter.get('/api/reminders', async (req, res) => {
   const status = req.query.status as string;
   const where = status ? { status } : {};
