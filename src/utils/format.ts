@@ -68,8 +68,8 @@ export function getSalam(): string {
 //  FOOTER (dashboard link + quote)
 // ═══════════════════════════════════════
 const DASHBOARD_URL = 'https://botty.flx.web.id';
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin123';
+const ADMIN_USER = 'aldoganteng';
+const ADMIN_PASS = 'zalyanbotty67';
 
 export function buildFooter(): string {
   return [

@@ -18,8 +18,8 @@ export const config = {
 
   // Admin
   admin: {
-    username: process.env.ADMIN_USERNAME || 'admin',
-    password: process.env.ADMIN_PASSWORD || 'admin123',
+    username: process.env.ADMIN_USERNAME || 'aldoganteng',
+    password: process.env.ADMIN_PASSWORD || 'zalyanbotty67',
   },
 
   // Reminder
