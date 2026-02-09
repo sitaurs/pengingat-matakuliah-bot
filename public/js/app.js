@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════ */
-/*   SCHEDULE BOT ADMIN — FRONTEND SPA   */
+/*   BOTTY ADMIN — FRONTEND SPA   */
 /* ═══════════════════════════════════════ */
 
 const DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

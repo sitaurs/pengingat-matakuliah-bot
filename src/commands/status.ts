@@ -42,10 +42,10 @@ export async function handleStatus(ctx: CommandContext): Promise<string> {
 
   return [
     '┌─────────────────────────┐',
-    '│  📊 *BOT STATUS*',
+    '│  📊 *BOTTY STATUS*',
     '└─────────────────────────┘',
     '',
-    `🤖 *Bot:* ✅ Online`,
+    `🤖 *Botty:* ✅ Online`,
     `📡 *GoWA:* ${gowaHealth.ok ? '✅ Connected' : '❌ ' + gowaHealth.status}`,
     `👥 *Grup aktif:* ${groupCount}`,
     '',

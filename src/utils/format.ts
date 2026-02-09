@@ -67,7 +67,7 @@ export function getSalam(): string {
 // ═══════════════════════════════════════
 //  FOOTER (dashboard link + quote)
 // ═══════════════════════════════════════
-const DASHBOARD_URL = 'http://13.55.23.245:4000';
+const DASHBOARD_URL = 'https://botty.flx.web.id';
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
 
@@ -75,14 +75,14 @@ export function buildFooter(): string {
   return [
     '',
     '━━━━━━━━━━━━━━━━━━━━━',
-    '🌐 *Dashboard Admin*',
+    '🌐 *Dashboard Botty*',
     `🔗 ${DASHBOARD_URL}`,
     `👤 User: \`${ADMIN_USER}\``,
     `🔑 Pass: \`${ADMIN_PASS}\``,
     '',
     `💬 _"${randomQuote()}"_`,
     '',
-    '🤖 _Schedule Bot v1.0_',
+    '🤖 _Botty v1.0_',
   ].join('\n');
 }
 

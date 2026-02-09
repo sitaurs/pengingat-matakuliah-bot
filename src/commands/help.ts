@@ -3,7 +3,7 @@ import type { CommandContext } from './router.js';
 export async function handleHelp(_ctx: CommandContext): Promise<string> {
   return [
     '╔═══════════════════════════╗',
-    '║  🤖 *SCHEDULE BOT COMMANDS*',
+    '║  🤖 *BOTTY COMMANDS*',
     '╚═══════════════════════════╝',
     '',
     '📋 *Jadwal*',

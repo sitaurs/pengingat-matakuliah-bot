@@ -1,7 +1,7 @@
 {
-  "name": "whatsapp-schedule-bot",
+  "name": "botty",
   "version": "1.0.0",
-  "description": "WhatsApp Schedule Bot with GoWA integration",
+  "description": "Botty — WhatsApp Schedule Bot with GoWA integration",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",

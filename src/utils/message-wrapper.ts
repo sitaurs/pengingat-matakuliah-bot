@@ -11,7 +11,7 @@
 import { getSalam, getRandomQuote } from './quotes.js';
 import { config } from '../config.js';
 
-const DASH_URL = process.env.DASHBOARD_URL || `http://localhost:${config.port}`;
+const DASH_URL = process.env.DASHBOARD_URL || 'https://botty.flx.web.id';
 
 /**
  * Wrap a message with salam header + dashboard footer + quote
@@ -30,7 +30,7 @@ export function wrapMessage(content: string, skipWrapper = false): string {
     content,
     ``,
     `━━━━━━━━━━━━━━━━━━━━`,
-    `📊 *Dashboard Admin Bot*`,
+    `📊 *Dashboard Botty*`,
     `🔗 ${DASH_URL}`,
     `👤 User: \`${config.admin.username}\``,
     `🔑 Pass: \`${config.admin.password}\``,

@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'wa-schedule-bot',
+      name: 'botty',
       script: 'npx',
       args: 'tsx src/index.ts',
       cwd: __dirname,
