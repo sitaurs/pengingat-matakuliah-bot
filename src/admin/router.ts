@@ -8,8 +8,9 @@ export const adminRouter = Router();
 
 // Simple auth middleware for admin API
 adminRouter.use((req: Request, res: Response, next) => {
-  // Skip auth for health and login
+  // Skip auth for health, login, and non-API paths (static assets, favicon, etc.)
   if (req.path === '/api/health' || req.path === '/api/login') return next();
+  if (!req.path.startsWith('/api/')) return next();
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Basic ')) {

@@ -62,8 +62,10 @@ async function handleLogin(e) {
   errEl.textContent = '';
   errEl.style.display = 'none';
   try {
-    const res = await fetch('/api/health', {
-      headers: { 'X-Admin-Token': btoa(user + ':' + pass) }
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
     });
     if (res.ok) {
       token = btoa(user + ':' + pass);
@@ -769,9 +771,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === e.currentTarget) closeModal();
   });
 
-  // Check if already logged in
+  // Check if already logged in (validate token against protected endpoint)
   if (token) {
-    api('/health').then(() => showApp()).catch(() => showLogin());
+    api('/dashboard').then(() => showApp()).catch(() => { token = ''; localStorage.removeItem('bot_token'); showLogin(); });
   } else {
     showLogin();
   }
