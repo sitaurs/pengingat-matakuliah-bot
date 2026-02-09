@@ -297,6 +297,7 @@ adminRouter.get('/api/reminders/upcoming', async (_req, res) => {
     const results = await Promise.all(reminders.map(async (r) => {
       let messagePreview = r.message || '';
       let courseName = '—';
+      let courseId: number | null = null;
       let startTime = '';
       let endTime = '';
       let location = '';
@@ -308,6 +309,7 @@ adminRouter.get('/api/reminders/upcoming', async (_req, res) => {
           include: { course: true },
         });
         if (entry) {
+          courseId = entry.courseId;
           courseName = entry.course.name;
           startTime = entry.startTime;
           endTime = entry.endTime;
@@ -336,6 +338,8 @@ adminRouter.get('/api/reminders/upcoming', async (_req, res) => {
         location,
         lecturerName,
         messagePreview,
+        courseId,
+        scheduleEntryId: r.scheduleEntryId,
       };
     }));
 

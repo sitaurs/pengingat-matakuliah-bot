@@ -186,8 +186,9 @@ async function loadUpcomingReminders() {
       const typeIcon = r.eventType === 'PRE_CLASS' ? '⏰' : r.eventType === 'CLASS_START' ? '🔔' : '📢';
       const typeLabel = r.eventType === 'PRE_CLASS' ? 'Pre-Class' : r.eventType === 'CLASS_START' ? 'Class Start' : r.eventType;
       const typeBadgeColor = r.eventType === 'PRE_CLASS' ? 'rgba(255,165,0,0.2);color:#ffa500' : 'rgba(0,245,255,0.2);color:#00f5ff';
-      return `<div class="upcoming-reminder-item" onclick='previewReminderMessage(${JSON.stringify(r.messagePreview).replace(/'/g, "&#39;")})'>
-        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+      const msgJson = JSON.stringify(r.messagePreview).replace(/'/g, "&#39;");
+      return `<div class="upcoming-reminder-item">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick='previewReminderMessage(${msgJson})'>
           <span style="font-size:20px;flex-shrink:0">${typeIcon}</span>
           <div style="min-width:0;flex:1">
             <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.courseName)}</div>
@@ -198,10 +199,11 @@ async function loadUpcomingReminders() {
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:${typeBadgeColor}">${typeLabel}</span>
-          <span style="font-size:11px;color:var(--text-dim)">${esc(r.chatTargetLabel)}</span>
-          <i class="fas fa-eye" style="color:var(--accent);font-size:12px"></i>
+          ${r.scheduleEntryId ? `<button class="btn-icon-mini" onclick="event.stopPropagation();quickEditSchedule(${r.scheduleEntryId})" title="Edit Jadwal"><i class="fas fa-calendar-alt"></i></button>` : ''}
+          ${r.courseId ? `<button class="btn-icon-mini" onclick="event.stopPropagation();quickEditNote(${r.courseId},${JSON.stringify(r.courseName).replace(/"/g,'&quot;')})" title="Tambah/Edit Note"><i class="fas fa-sticky-note"></i></button>` : ''}
+          <button class="btn-icon-mini" onclick="event.stopPropagation();previewReminderMessage(${msgJson})" title="Preview Pesan"><i class="fas fa-eye"></i></button>
         </div>
       </div>`;
     }).join('');
@@ -209,6 +211,63 @@ async function loadUpcomingReminders() {
     const container = document.getElementById('upcoming-reminders');
     if (container) container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--pink)"><i class="fas fa-exclamation-triangle"></i> Gagal memuat reminder</div>';
   }
+}
+
+async function quickEditSchedule(entryId) {
+  try {
+    await ensureCourses();
+    const entries = await api('/schedule-entries');
+    const e = entries.find(x => x.id === entryId);
+    if (!e) { toast('Jadwal tidak ditemukan', 'error'); return; }
+    const dayOpts = [1,2,3,4,5].map(d => `<option value="${d}" ${d===e.dayOfWeek?'selected':''}>${DAYS1[d]}</option>`).join('');
+    const courseOpts = cachedCourses.map(c => `<option value="${c.id}" ${c.id===e.courseId?'selected':''}>${esc(c.name)}</option>`).join('');
+    openModal('✏️ Edit Jadwal', `
+      <div class="form-group"><label>Hari</label><select class="form-input" id="f-day">${dayOpts}</select></div>
+      <div class="form-group"><label>Mata Kuliah</label><select class="form-input" id="f-course">${courseOpts}</select></div>
+      <div class="form-group"><label>Jam Mulai</label><input class="form-input" id="f-start" value="${e.startTime}"></div>
+      <div class="form-group"><label>Jam Selesai</label><input class="form-input" id="f-end" value="${e.endTime}"></div>
+      <div class="form-group"><label>Ruangan</label><input class="form-input" id="f-loc" value="${e.locationOverride || e.course?.locationDefault || ''}" placeholder="${e.course?.locationDefault || 'Ruangan'}"></div>`,
+      async () => {
+        await api('/schedule-entries/' + entryId, { method: 'PUT', body: JSON.stringify({
+          dayOfWeek: +gv('f-day'), courseId: +gv('f-course'), startTime: gv('f-start'), endTime: gv('f-end'), locationOverride: gv('f-loc') || null
+        })});
+        toast('Jadwal diperbarui!', 'success');
+        loadUpcomingReminders();
+      }
+    );
+  } catch (e) { toast('Gagal memuat jadwal: ' + e.message, 'error'); }
+}
+
+async function quickEditNote(courseId, courseName) {
+  try {
+    const notes = await api('/notes');
+    const existing = notes.find(n => n.courseId === courseId);
+    if (existing) {
+      openModal('📝 Edit Catatan — ' + courseName, `
+        <div class="form-group"><label>Catatan untuk ${esc(courseName)}</label>
+          <textarea class="form-input" id="f-text" rows="5" placeholder="Tulis catatan yang akan dikirim bersama reminder...">${esc(existing.text)}</textarea>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim);margin-top:4px"><i class="fas fa-info-circle"></i> Catatan ini akan otomatis muncul di pesan reminder</p>`,
+        async () => {
+          await api('/notes/' + existing.id, { method: 'PUT', body: JSON.stringify({ courseId, text: gv('f-text') })});
+          toast('Catatan diperbarui!', 'success');
+          loadUpcomingReminders();
+        }
+      );
+    } else {
+      openModal('📝 Tambah Catatan — ' + courseName, `
+        <div class="form-group"><label>Catatan untuk ${esc(courseName)}</label>
+          <textarea class="form-input" id="f-text" rows="5" placeholder="Tulis catatan yang akan dikirim bersama reminder..."></textarea>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim);margin-top:4px"><i class="fas fa-info-circle"></i> Catatan ini akan otomatis muncul di pesan reminder</p>`,
+        async () => {
+          await api('/notes', { method: 'POST', body: JSON.stringify({ courseId, text: gv('f-text') })});
+          toast('Catatan ditambahkan!', 'success');
+          loadUpcomingReminders();
+        }
+      );
+    }
+  } catch (e) { toast('Gagal memuat catatan: ' + e.message, 'error'); }
 }
 
 function previewReminderMessage(message) {
